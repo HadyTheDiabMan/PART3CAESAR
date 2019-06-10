@@ -11,6 +11,7 @@ public class CaesarCipher3
 		Scanner scan= new Scanner(System.in);
 		String fileName;
 		boolean encrypt=true; //true=enc, false=dec
+		boolean crack=false;
 		int shiftAmount;
 		String stringed;
 		System.out.print("\nWould you like to encrypt,decrypt,or crack a file?: ");
@@ -19,38 +20,52 @@ public class CaesarCipher3
 			if(encryptchoice.equals("encrypt"))
 			{
 			encrypt=true;
+			System.out.print("\nHow many places should the alphabet be shifted?: ");
+			shiftAmount= scan.nextInt();
+			scan.nextLine();
+			System.out.print("\nEnter a filename to encrypt: ");
+			fileName= scan.nextLine();
+			System.out.println(caesar_cipher(fileName,encrypt,crack,shiftAmount));
+			String partOfFile= fileName.substring(0, fileName.length()-4);
+			System.out.println("Result written to "+partOfFile+"_ENC.txt");
 			}
-			if(encryptchoice.equals("decrypt"))
+			else if(encryptchoice.equals("decrypt"))
 			{
 			encrypt=false;
+			System.out.print("\nHow many places should the alphabet be shifted?: ");
+			shiftAmount= scan.nextInt();
+			scan.nextLine();
+			System.out.print("\nEnter a filename to decrypt: ");
+			fileName= scan.nextLine();
+			System.out.println(caesar_cipher(fileName,encrypt,crack,shiftAmount));
+			String partOfFile= fileName.substring(0, fileName.length()-4);
+			System.out.println("Result written to "+partOfFile+"_DEC.txt");
 			}
-			if(encryptchoice.equals("crack"))
+			else if(encryptchoice.equals("crack"))
 			{
 				encrypt=false;
-				System.out.print("\nEnter a filename to encrypt: ");
+				crack=true;
+				System.out.print("\nEnter a filename to crack: ");
 				fileName= scan.nextLine();
-			}
-		System.out.print("\nHow many places should the alphabet be shifted?: ");
-		shiftAmount= scan.nextInt();
-		scan.nextLine();
-			if(encrypt==true)
-			{
-				System.out.print("\nEnter a filename to encrypt: ");
-				fileName= scan.nextLine();
-				System.out.println(caesar_cipher(fileName,encrypt,shiftAmount));
-				String partOfFile= fileName.substring(0, fileName.length()-4);
-				System.out.println("Result written to "+partOfFile+"_ENC.txt");
-			}
-			if(encrypt==false)
-			{
-				System.out.print("\nEnter a filename to decrypt: ");
-				fileName= scan.nextLine();
-				System.out.println(caesar_cipher(fileName,encrypt,shiftAmount));
-				String partOfFile= fileName.substring(0, fileName.length()-4);
-				System.out.println("Result written to "+partOfFile+"_DEC.txt");
+				for(int shift=0; shift<26;shift++)
+				{
+					System.out.println(caesar_cipher(fileName,encrypt,crack,shift));
+					System.out.println("Is this correct? Y/N: ");
+					String choice= scan.nextLine();
+					if(choice.equals("Y"))
+					{
+						String partOfFile= fileName.substring(0, fileName.length()-4);
+						System.out.println("Result written to "+partOfFile+"_DEC.txt");
+						break;
+					}
+					else
+						continue;
+						
+				}
 				
 			}
 		
+			
 		
 		
 		
@@ -60,11 +75,11 @@ public class CaesarCipher3
 
 	
 	public static String caesar_cipher(String fileName, 
-	boolean encrypt, int shiftAmount) throws IOException
+	boolean encrypt,boolean cracked, int shiftAmount) throws IOException
 {
 		char encryptedchar;
 	String stringed="";
-		if(encrypt==true)
+		if(encrypt==true && cracked==false)
 		{
 			Scanner inputFile= new Scanner(new File(fileName)); 
 			
@@ -141,10 +156,9 @@ public class CaesarCipher3
 		}
 		
 		
-		if(encrypt==false)
+		if(encrypt==false & cracked == false)
 		{
-			if(fileName!=null)
-			{
+			
 			Scanner inputFile= new Scanner(new File(fileName)); 
 			
 			String partOfFile= fileName.substring(0, fileName.length()-4);
@@ -217,10 +231,82 @@ public class CaesarCipher3
 			inputFile.close();
 			
 		}
-			else
-			{
+		
+		if(cracked==true)
+		{
+			Scanner inputFile= new Scanner(new File(fileName)); 
+			
+			String partOfFile= fileName.substring(0, fileName.length()-4);
+			PrintWriter outputfile= new PrintWriter(partOfFile+"_DEC.txt");
+			
+			
+			while (inputFile.hasNext())
+
 				
-			}
+					{ 
+
+					String line = inputFile.nextLine(); 
+					char[] linechars= new char[line.length()];
+					
+					for(int h=0; h<line.length();h++)
+					{
+						linechars[h]= line.charAt(h);
+					}
+					
+					for(int i=0; i<line.length();i++)
+					{
+						
+						
+						
+						char regularchar=linechars[i];
+						//char decryptedchar= (char) (regularchar+((shiftAmount%regularchar)));
+						if(regularchar<65)
+						{
+							stringed+=""+regularchar;
+							continue;
+						}
+						if(regularchar>122)
+						{
+							stringed+=""+regularchar;
+							continue;
+						}
+						if(regularchar<97&&regularchar>90)
+						{
+							stringed+=""+regularchar;
+							continue;
+						}
+						
+						char decryptedchar = (char) ((char) (regularchar+26)-26-shiftAmount);
+						
+						if(decryptedchar<65)
+						{
+							decryptedchar=(char) (decryptedchar-(26-shiftAmount));	
+							
+						}
+						if(decryptedchar>122)
+						{
+							decryptedchar=(char) (decryptedchar-(26-shiftAmount));
+							
+						}
+						if(decryptedchar<97&&decryptedchar>90)
+						{
+							decryptedchar=(char) (decryptedchar-(26-shiftAmount));
+							
+						}
+						
+						outputfile.print(decryptedchar);
+						stringed+=""+decryptedchar;
+								 
+					}
+					outputfile.println("\n");
+					System.out.println("");
+
+					}
+			
+			outputfile.close();
+			inputFile.close();
+			stringed= stringed.substring(100);
+		}
 		
 		return stringed;	
 		
